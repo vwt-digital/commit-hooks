@@ -43,7 +43,7 @@ echo "Flake8.............................................................DONE"
 ##########                         Shell lint                       ##########
 ##############################################################################
 for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
-    | grep -E '\.(py)$'); do
+    | grep -E '\.(sh)$'); do
     shellcheck $file 2> /dev/null
     if [ $? -ne 0 ] ; then
         echo "Lint check of bash script failed. Your changes were not commited."
