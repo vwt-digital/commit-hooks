@@ -34,7 +34,7 @@ echo "Configured global core.hooksPath: ${DIR}/hooks"
 echo "Installing other required packages for git hooks..."
 if ! command -v flake8; then
   echo "Installing flak8..."
-  pip install flake8
+  pip3 install flake8
 fi
 
 
