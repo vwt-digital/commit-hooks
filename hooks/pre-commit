@@ -16,7 +16,7 @@ echo "Running pre-commit hook on ${branch_name} branch:"
 echo "JSON..."
 for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
     | grep -E '\.(json)$'); do
-    python -mjson.tool $file 2> /dev/null
+    python -mjson.tool $file 2> /dev/null 1>&2
     if [ $? -ne 0 ] ; then
         echo
         echo "ERROR: Lint check of JSON object failed. Your changes were not commited."
