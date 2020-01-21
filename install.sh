@@ -21,7 +21,7 @@ if [ "$machine" = "Linux" ]; then
     echo "Installing shellcheck..."
     apt-get install -y shellcheck
     echo "Installing bandit..."
-    apt-get install python3-bandit
+    apt-get install -y python3-bandit
     for file in "$DIR"/hooks/*; do
         echo "$file"
         sed -i 's/\-E/\-P/g' "${file}"
