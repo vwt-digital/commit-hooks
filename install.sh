@@ -18,7 +18,10 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 if [ "$machine" = "Linux" ]; then
     echo "Installing packages for ${machine}..."
+    echo "Installing shellcheck..."
     apt-get install -y shellcheck
+    echo "Installing bandit..."
+    apt-get install -y python3-bandit
     for file in "$DIR"/hooks/*; do
         echo "$file"
         sed -i 's/\-E/\-P/g' "${file}"
@@ -36,5 +39,3 @@ if ! command -v flake8; then
   echo "Installing flak8..."
   pip3 install flake8
 fi
-
-

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # An example hook script to verify what is about to be committed.
 # Called by "git commit" with no arguments.  The hook should
@@ -19,7 +19,7 @@ for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
     python -mjson.tool $file 2> /dev/null 1>&2
     if [ $? -ne 0 ] ; then
         echo
-        echo "ERROR: Lint check of JSON object failed. Your changes were not commited."
+        echo "ERROR: Lint check of JSON object failed. Your changes were not committed."
         echo "in $git_dir/$file:"
         python -mjson.tool $file
         exit 1
@@ -35,7 +35,7 @@ for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
     flake8 --max-line-length=139 $file 2> /dev/null
     if [ $? -ne 0 ] ; then
         echo
-        echo "ERROR: Lint check of python file failed. Your changes were not commited."
+        echo "ERROR: Lint check of python file failed. Your changes were not committed."
         echo "in $git_dir/$file:"
         exit 1
     fi
@@ -50,7 +50,23 @@ for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
     shellcheck $file 2> /dev/null
     if [ $? -ne 0 ] ; then
         echo
-        echo "ERROR: Lint check of bash script failed. Your changes were not commited."
+        echo "ERROR: Lint check of bash script failed. Your changes were not committed."
+        echo "in $git_dir/$file:"
+        exit 1
+    fi
+done
+
+##############################################################################
+##########                         Bandit check                     ##########
+##############################################################################
+echo "Bandit..."
+for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
+    | grep -E '\.(py)$'); do
+    # Add more l's to report only higher severity errors
+    bandit $file -q -l
+    if [ $? -ne 0 ] ; then
+        echo
+        echo "ERROR: Bandit check of python failed. Your changes were not committed."
         echo "in $git_dir/$file:"
         exit 1
     fi
