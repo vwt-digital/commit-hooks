@@ -22,10 +22,6 @@ if [ "$machine" = "Linux" ]; then
     apt-get install -y shellcheck
     echo "Installing bandit..."
     apt-get install -y python3-bandit
-    for file in "$DIR"/hooks/*; do
-        echo "$file"
-        sed -i 's/\-E/\-P/g' "${file}"
-    done
 elif [ "$machine" = "Mac" ]; then
     echo "Installing packages for ${machine}..."
     brew install shellcheck
