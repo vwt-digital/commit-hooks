@@ -60,10 +60,17 @@ done
 ##########                         Bandit check                     ##########
 ##############################################################################
 echo "Bandit..."
+bandit_file=$(pwd)/.bandit
+
+if [[ -f "$bandit_file" ]]; then
+    bandit_config="--ini=$bandit_file"
+else bandit_config=""
+fi
+
 for file in $(git diff-index --name-only --diff-filter=ACM --cached HEAD -- \
     | grep -E '\.(py)$'); do
     # Add more l's to report only higher severity errors
-    bandit $file -q -l
+    bandit "$file" -q -l "$bandit_config"
     if [ $? -ne 0 ] ; then
         echo
         echo "ERROR: Bandit check of python failed. Your changes were not committed."
