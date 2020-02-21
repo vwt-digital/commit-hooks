@@ -22,11 +22,6 @@ if [ "$machine" = "Linux" ]; then
   git clone https://github.com/vwt-digital/cloudbuilder-sast
   mv cloudbuilder-sast/docker-sast.sh /opt/sast-scan.sh
   rm -rf cloudbuilder-sast/
-#    echo "Installing packages for ${machine}..."
-#    echo "Installing shellcheck..."
-#    apt-get install -y shellcheck
-#    echo "Installing bandit..."
-#    pip3 install bandit
 elif [ "$machine" = "Mac" ]; then
   echo "Installing packages for ${machine}..."
   brew install shellcheck
