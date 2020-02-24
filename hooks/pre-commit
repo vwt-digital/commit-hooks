@@ -16,7 +16,7 @@ echo "Running pre-commit hook on branch ${branch_name}: "
 echo "SAST scan..."
 
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
-  /opt/sast-scan.sh --type python --type typescript --target $file
+  /opt/sast-scan.sh --type python --type typescript --target "$file" || break
 done
 if [ $? -ne 0 ] ; then
         echo
