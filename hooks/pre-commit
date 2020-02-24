@@ -8,6 +8,7 @@
 
 git_dir=$(git rev-parse --show-toplevel)
 branch_name=$(git branch | grep \* | cut -d ' ' -f2)
+exit_code=0
 
 echo "Running pre-commit hook on branch ${branch_name}: "
 ##############################################################################
@@ -16,9 +17,10 @@ echo "Running pre-commit hook on branch ${branch_name}: "
 echo "SAST scan..."
 
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
-  /opt/sast-scan.sh --type python --type typescript --target "$file" || break
+  /opt/sast-scan.sh --type python --type typescript --target "$file" || exit_code=1
 done
-if [ $? -ne 0 ] ; then
+
+if [ "$exit_code" != 0 ] ; then
         echo
         echo "ERROR: SAST scan failed. Your changes were not committed."
         echo "in $git_dir/$file:"
