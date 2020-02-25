@@ -19,7 +19,7 @@ echo "SAST scan..."
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
   docker run -v "$(pwd)":/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp/"$file" || exit_code=1
 done
-if [[ "$exit_code" -eq 1 ]]; then
+if ! docker run hello-world > /dev/null 2>&1; then
   echo -e "\e[1;31mError: Docker run wasn't executed with sufficient permissions."\
           "See this page: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user"\
           "for instructions on managing Docker as a non-root user.🔗 '\e[0m"
