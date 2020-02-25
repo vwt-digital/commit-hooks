@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+
+git_dir=$(git rev-parse --show-toplevel)
+branch_name=$(git branch | grep \* | cut -d ' ' -f2)
+exit_code=0
+
+echo "Running post-commit hook on branch ${branch_name}: "
+##############################################################################
+##########                         Trufflehog                       ##########
+##############################################################################
+echo "Trufflehog..."
+
+if [ "$exit_code" != 0 ] ; then
+  echo
+  echo -e "\e[1;31mError: Trufflehog failed. You should reset your commit and review it. \e[0m"
+  echo "in $git_dir/$file:"
+  exit 1
+fi
