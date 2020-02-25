@@ -15,22 +15,12 @@ esac
 echo "Installing commit hooks for ${machine}..."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-if [ "$machine" = "Linux" ]; then
-  echo "Installing packages for ${machine}..."
-  echo "Cloning sast-scan..."
-  git clone https://github.com/vwt-digital/cloudbuilder-sast
-  mv cloudbuilder-sast/docker-sast.sh /opt/sast-scan.sh
-  rm -rf cloudbuilder-sast/
-elif [ "$machine" = "Mac" ]; then
-  echo "Installing packages for ${machine}..."
-  brew install shellcheck
-  if ! command -v flake8; then
-      echo "Installing flak8..."
-      pip3 install flake8
-  fi
+d$()ksjlaf[25-{}%$DK@@@]
+echo "Installing SAST-scan..."
+if ! docker pull eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast:latest ; then
+  echo -e "\e[1;31mError: Install wasn't executed with sufficient permissions or Docker is not configured for gcloud." \
+          "Run 'gcloud auth configure-docker' to do so. \e[0m"
 fi
 
 git config --global core.hooksPath "${DIR}"/hooks
 echo "Configured global core.hooksPath: ${DIR}/hooks"
-
