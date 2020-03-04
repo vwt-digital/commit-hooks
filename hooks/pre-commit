@@ -15,10 +15,20 @@ echo "Running pre-commit hook on branch ${branch_name}: "
 ##########                         SAST scan                        ##########
 ##############################################################################
 echo "SAST scan..."
-
+if [ ! -d "tmp-pre-commit-folder" ]; then
+  mkdir tmp-pre-commit-folder
+else
+  echo -e "\e[1;31mError: folder tmp-pre-commit-folder already exists.\e[0m"
+  exit 1
+fi
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
-  docker run -v "$(pwd)":/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp/"$file" || exit_code=1
+  cp "$file" tmp-pre-commit-folder
 done
+
+docker run --volume "$(pwd)"/tmp-pre-commit-folder:/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp || exit_code=1
+
+rm -rf tmp-pre-commit-folder
+
 if ! docker run hello-world > /dev/null 2>&1; then
   echo -e "\e[1;31mError: Docker run wasn't executed with sufficient permissions."\
           "See this page: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user"\
