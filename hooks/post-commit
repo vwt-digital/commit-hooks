@@ -15,7 +15,7 @@ echo "Running post-commit hook on branch ${branch_name}: "
 ##########                         Trufflehog                       ##########
 ##############################################################################
 echo "Trufflehog..."
-docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --no-yamllint --no-jsonlint --no-shellcheck --target /tmp --trufflehog --cleanup /tmp || exit_code=1
+docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --no-yamllint --no-jsonlint --no-shellcheck --target /tmp --trufflehog --cleanup /tmp --max_depth=1 || exit_code=1
 
 if [ "$exit_code" != 0 ] ; then
   echo
