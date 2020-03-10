@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# An example hook script to verify what is about to be committed.
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+
+git_dir=$(git rev-parse --show-toplevel)
+branch_name=$(git branch | grep \* | cut -d ' ' -f2)
+exit_code=0
+
+echo "Running post-commit hook on branch ${branch_name}: "
+##############################################################################
+##########                         Trufflehog                       ##########
+##############################################################################
+echo "Trufflehog..."
+docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast" --no-yamllint --no-jsonlint --no-shellcheck --target /tmp --trufflehog --cleanup /tmp --max_depth=1 || exit_code=1
+
+if [ "$exit_code" != 0 ] ; then
+  echo
+  echo -e "\e[1;31mError: Trufflehog failed. You should reset your commit and review it. \e[0m"
+  exit 1
+fi
