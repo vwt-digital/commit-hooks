@@ -1,5 +1,6 @@
 # pre-commit
 
+###### Note: The *default* branch develop contain breaking changes if the sast image is not up to date.
 This repository uses a [cloudbuilder-sast](https://github.com/vwt-digital/cloudbuilder-sast) image.  
 If you do not have access to the vwt gcr registry, you will need to build this image yourself and change the install 
 script to use the location of your image.
