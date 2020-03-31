@@ -29,7 +29,7 @@ done
 [ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-pre-commit-folder
 
 
-docker run --volume "$(pwd)"/tmp-pre-commit-folder:/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp --config /tmp/config.txt|| exit_code=1
+docker run --volume "$(pwd)"/tmp-pre-commit-folder:/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp --config /tmp/config.txt || exit_code=1
 
 rm -rf tmp-pre-commit-folder
 
