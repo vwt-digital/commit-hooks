@@ -15,8 +15,7 @@ echo "Running post-commit hook on branch ${branch_name}: "
 ##########                         Trufflehog                       ##########
 ##############################################################################
 echo "Trufflehog..."
-docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --no-yamllint --no-jsonlint --no-shellcheck --target /tmp || exit_code=1
-
+docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --target /tmp --context post-commit || exit_code=1
 if [ "$exit_code" != 0 ] ; then
   echo
   echo -e "\e[1;31mError: Trufflehog failed. You should reset your commit and review it. \e[0m"

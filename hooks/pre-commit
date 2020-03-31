@@ -21,7 +21,6 @@ else
   echo -e "\e[1;31mError: folder tmp-pre-commit-folder already exists.\e[0m"
   exit 1
 fi
-touch tmp-pre-commit-folder/config.txt; echo "--no-trufflehog" > tmp-pre-commit-folder/config.txt
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
   cp "$file" tmp-pre-commit-folder
 done
@@ -29,7 +28,7 @@ done
 [ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-pre-commit-folder
 
 
-docker run --volume "$(pwd)"/tmp-pre-commit-folder:/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --type python --type typescript --target /tmp --config /tmp/config.txt|| exit_code=1
+docker run --volume "$(pwd)"/tmp-pre-commit-folder:/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --target /tmp --context pre-commit || exit_code=1
 
 rm -rf tmp-pre-commit-folder
 
