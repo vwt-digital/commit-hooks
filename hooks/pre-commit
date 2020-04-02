@@ -15,12 +15,6 @@ echo "Running pre-commit hook on branch ${branch_name}: "
 ##########                         SAST scan                        ##########
 ##############################################################################
 echo "SAST scan..."
-if [ ! -d "tmp-pre-commit-folder" ]; then
-  mkdir tmp-pre-commit-folder
-else
-  echo -e "\e[1;31mError: folder tmp-pre-commit-folder already exists.\e[0m"
-  exit 1
-fi
 
 docker run --volume "$git_dir":/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --target /tmp --context pre-commit || exit_code=1
 
