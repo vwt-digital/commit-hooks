@@ -40,7 +40,7 @@ if [[ -d sast-config ]]; then
   cp -r "$git_dir"/sast-config tmp-pre-commit-folder
 fi
 
-docker run --volume tmp-pre-commit-folder:/tmp $docker_image --target /tmp --context pre-commit || exit_code=1
+docker run --volume "$git_dir"/tmp-pre-commit-folder:/tmp $docker_image --target /tmp --context pre-commit || exit_code=1
 
 rm -rf tmp-pre-commit-folder
 
