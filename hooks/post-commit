@@ -24,7 +24,21 @@ else
   docker_image="eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast"
 fi
 
-docker run --volume "$git_dir":/tmp $docker_image --target /tmp --context post-commit || exit_code=1
+mkdir tmp-pre-commit-folder > /dev/null 2>&1
+
+for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
+  cp --parents "$file" tmp-pre-commit-folder
+done
+[ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-pre-commit-folder
+cp -r "$git_dir"/.git tmp-pre-commit-folder
+if [[ -d sast-config ]]; then
+  cp -r "$git_dir"/sast-config tmp-pre-commit-folder
+fi
+
+docker run --volume "$git_dir"/tmp-pre-commit-folder:/tmp $docker_image --target /tmp --context pre-commit || exit_code=1
+
+rm -rf tmp-pre-commit-folder
+
 if [ "$exit_code" != 0 ] ; then
   echo
   echo -e "\e[1;31mError: Trufflehog failed. You should reset your commit and review it. \e[0m"
