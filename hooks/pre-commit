@@ -5,10 +5,11 @@
 # exit with non-zero status after issuing an appropriate message if
 # it wants to stop the commit.
 #
-
 git_dir=$(git rev-parse --show-toplevel)
 branch_name=$(git branch | grep \* | cut -d ' ' -f2)
 exit_code=0
+
+hook_branch=$(cd "$(dirname "$0")"/.. && git rev-parse --abbrev-ref HEAD)
 
 echo "Running pre-commit hook on branch ${branch_name}: "
 ##############################################################################
@@ -16,7 +17,15 @@ echo "Running pre-commit hook on branch ${branch_name}: "
 ##############################################################################
 echo "SAST scan..."
 
-docker run --volume "$git_dir":/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --target /tmp --context pre-commit || exit_code=1
+if [[ $hook_branch == "develop" ]]; then
+  echo -e "\e[33mWARNING: you are running a development version of the git hooks! Use the master branch for more" \
+   "stable and secure hooks\e[0m"
+  docker_image="eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast"
+else
+  docker_image="eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast"
+fi
+
+docker run --volume "$git_dir":/tmp $docker_image --target /tmp --context pre-commit || exit_code=1
 
 if ! docker run hello-world > /dev/null 2>&1; then
   echo -e "\e[1;31mError: Docker run wasn't executed with sufficient permissions."\
