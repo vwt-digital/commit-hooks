@@ -45,8 +45,9 @@ docker run --volume "$git_dir"/tmp-pre-commit-folder:/tmp $docker_image --target
 rm -rf tmp-pre-commit-folder
 
 if [ "$exit_code" != 0 ] ; then
+  (cd "$git_dir" && git reset)
   echo
-  echo "ERROR: SAST scan failed. Your changes were not committed."
+  echo "ERROR: SAST scan failed. Your changes were reset."
   echo "in $git_dir/$file:"
   exit 1
 fi
