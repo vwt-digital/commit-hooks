@@ -10,12 +10,35 @@ git_dir=$(git rev-parse --show-toplevel)
 branch_name=$(git branch | grep \* | cut -d ' ' -f2)
 exit_code=0
 
+hook_branch=$(cd "$(dirname "$0")"/.. && git rev-parse --abbrev-ref HEAD)
+
 echo "Running post-commit hook on branch ${branch_name}: "
 ##############################################################################
-##########                         Trufflehog                       ##########
+##########                         SAST scan                        ##########
 ##############################################################################
-echo "Trufflehog..."
-docker run --volume "$(pwd)":/tmp "eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast" --target /tmp --context post-commit || exit_code=1
+echo "SAST scan..."
+
+if [[ $hook_branch == "develop" ]]; then
+  docker_image="eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast"
+else
+  docker_image="eu.gcr.io/vwt-p-gew1-dat-cloudbuilders/cloudbuilder-sast"
+fi
+
+mkdir tmp-post-commit-folder > /dev/null 2>&1
+
+for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
+  cp --parents "$file" tmp-post-commit-folder
+done
+[ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-post-commit-folder
+cp -r "$git_dir"/.git tmp-post-commit-folder
+if [[ -d sast-config ]]; then
+  cp -r "$git_dir"/sast-config tmp-post-commit-folder
+fi
+
+docker run --volume "$git_dir"/tmp-post-commit-folder:/tmp $docker_image --target /tmp --context post-commit || exit_code=1
+
+rm -rf tmp-post-commit-folder
+
 if [ "$exit_code" != 0 ] ; then
   echo
   echo -e "\e[1;31mError: Trufflehog failed. You should reset your commit and review it. \e[0m"
