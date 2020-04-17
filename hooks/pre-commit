@@ -62,7 +62,8 @@ docker run --volume "$git_dir"/tmp-pre-commit-folder:/tmp $docker_image --target
 rm -rf tmp-pre-commit-folder
 
 # Unstash staged files
-git stash pop || exit_code=1
+echo "Unstashing unstaged files..."
+git stash pop -q || exit_code=1
 
 if [ "$exit_code" != 0 ] ; then
   echo
