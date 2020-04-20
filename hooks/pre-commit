@@ -56,7 +56,7 @@ if [[ -d sast-config ]]; then
 fi
 
 # Run cloudbuilder-sast on temporary folder
-docker run --volume "$git_dir"/tmp-pre-commit-folder:/tmp $docker_image --target /tmp --context pre-commit || exit_code=1
+docker run --volume "$git_dir"/tmp-pre-commit-folder:/sast-files $docker_image --context pre-commit || exit_code=1
 
 # Remove temporary folder
 rm -rf tmp-pre-commit-folder
