@@ -35,7 +35,7 @@ if [[ -d sast-config ]]; then
   cp -r "$git_dir"/sast-config tmp-post-commit-folder
 fi
 
-docker run --volume "$git_dir"/tmp-post-commit-folder:/tmp $docker_image --target /tmp --context post-commit || exit_code=1
+docker run --volume "$git_dir"/tmp-post-commit-folder:/sast-files $docker_image --context post-commit || exit_code=1
 
 rm -rf tmp-post-commit-folder
 
