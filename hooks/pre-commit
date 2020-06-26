@@ -44,10 +44,13 @@ fi
 mkdir tmp-pre-commit-folder > /dev/null 2>&1
 
 # Recursively copy files to temporary folder
+OLDIFS=$IFS
+IFS=$'\n'
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
    dir=$(dirname "$file")
-  (cd tmp-pre-commit-folder && mkdir -p $dir && cp ../$file $dir)
+  (cd tmp-pre-commit-folder && mkdir -p $dir && cp ../"$file" "$dir")
 done
+IFS=$OLDIFS
 # Copy node_modules
 [ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-pre-commit-folder
 # Copy sast-config
