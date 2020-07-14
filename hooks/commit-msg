@@ -21,7 +21,7 @@ remote_spec=$(git remote -v | grep "$(git remote)\s.*(push)$")
 
 if [ -n "$(echo ${remote_spec} | grep "vwt-digital")" ]
 then
-    expected_ref=DAT
+    expected_ref="DAT\|DAN"
     echo "Committing to vwt-digital repository, expect ${expected_ref} issue reference..."
 fi
 
