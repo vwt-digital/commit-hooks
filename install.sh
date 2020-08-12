@@ -20,12 +20,15 @@ else
   docker pull eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast:latest
 fi
 
-#[ -e "${DIR}"/hooks/control.config ] && rm "${DIR}"/hooks/control.config
-#read -p "Do you want full control over pre-commit and disable staging process? (Y/N) " -r
-#if [[ $REPLY =~ ^[Yy]$ ]]
-#then
-#    echo "pre-commit-stage-control" >> "${DIR}"/hooks/control.config; echo
-#fi
+[ -e "${DIR}"/hooks/control.config ] && rm "${DIR}"/hooks/control.config
+echo -e "\e[93m[FOLLOWING OPTION(s) OVERWRITE(s) RECOMMENDED SETTINGS]\e[0m"
+echo "Do you want full control over pre-commit and disable automatic staging process?  [Y/N] "
+echo -e "(This only includes the pre-commit and executes 'git reset' on failing tests)"
+read -r REPLY
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo "pre-commit-stage-control" >> "${DIR}"/hooks/control.config; echo
+fi
 
 git config --global core.hooksPath "${DIR}"/hooks
 echo "Configured global core.hooksPath: ${DIR}/hooks"
