@@ -15,6 +15,18 @@ This repository uses a [cloudbuilder-sast](https://github.com/vwt-digital/cloudb
 If you do not have access to the vwt gcr registry, you will need to build this image yourself and change the install 
 script and the hooks to use the location of your image.
 
+#### Extra install option(s)
+<sub><sup>*FOLLOWING OPTION(s) OVERWRITE(s) RECOMMENDED SETTINGS*</sub></sup>
+
+Install.sh will ask for user input on the following option(s):
+
+1. pre-commit-stage-control (Y/N)
+> Denies the pre-commit to stage and unstage. Runs `git reset` when test fails. Disabled (N) by default. 
+> Could resolve issues when removing / editing files in IDE.
+
+Removal of all options without running install.sh, is possible by deleting `control.config` from the hooks folder.
+
+
 ## Usage 
 After running the install script, the git hooks path is set to the hooks directory in this repository. Any changes to
 the files in that directory will be automatically applied. There is no need to run the install script again, unless 
