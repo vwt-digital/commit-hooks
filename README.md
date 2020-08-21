@@ -20,7 +20,7 @@ script and the hooks to use the location of your image.
 
 Install.sh will ask for user input on the following option(s):
 
-1. pre-commit-stage-control (Y/N)
+1. pre-commit-stage-control (y/N)
 > Denies the pre-commit to stage and unstage. Runs `git reset` when test fails. Disabled (N) by default. 
 > Could resolve issues when removing / editing files in IDE.
 
