@@ -14,7 +14,7 @@ hook_branch=$(cd "$(dirname "$0")"/.. && git rev-parse --abbrev-ref HEAD)
 echo "Running pre-commit hook on branch ${branch_name}: "
 
 # Stash unstaged files
-if [ ! -f "$config" ] || ! grep -q "pre-commit-stage-control" "$config"; then
+if [ ! -f "$config" ] || ! grep -q -s "pre-commit-stage-control" "$config"; then
   echo "Stashing unstaged files..."
   stash_name="pre-commit-$(date '+%Y-%m-%d_%Hh%Mm%Ss')"
   if ! git stash save --keep-index "$stash_name"; then
@@ -67,7 +67,7 @@ docker run --volume "$git_dir"/tmp-pre-commit-folder:/sast-files $docker_image -
 rm -rf tmp-pre-commit-folder
 
 # Unstash staged files
-if [ ! -f "$config" ] || ! grep -q "pre-commit-stage-control" "$config"; then
+if [ ! -f "$config" ] || ! grep -q -s "pre-commit-stage-control" "$config"; then
   if [[ $(git stash list) == *$stash_name* ]]; then
     echo "Unstashing unstaged files..."
     git stash pop -q || exit_code=1
@@ -78,7 +78,7 @@ if [ "$exit_code" != 0 ] ; then
   echo
   echo "ERROR: SAST scan failed. Your changes were reset."
   echo "in $git_dir/$file:"
-  if [ -f "$config" ] || grep -q "pre-commit-stage-control" "$config"; then
+  if [ -f "$config" ] || grep -q -s "pre-commit-stage-control" "$config"; then
     git reset
   fi
   exit 1
