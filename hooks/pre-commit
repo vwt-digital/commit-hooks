@@ -19,14 +19,16 @@ function move_files() {
   IFS=$'\n'
   for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
     dir=$(dirname "$file")
-    (cd tmp-pre-commit-folder && mkdir -p "$dir" && git show ":$file" >> "$file")
+    (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" show ":$file" >> "$file")
   done
   IFS=$OLDIFS
 }
 
-move_files & recover_image && wait
-
 git_dir=$(git rev-parse --show-toplevel)
+
+move_files
+recover_image
+
 exit_code=0
 
 echo ">>> SAST scan..."
