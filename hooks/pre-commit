@@ -19,7 +19,7 @@ function move_files() {
   IFS=$'\n'
   for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
     dir=$(dirname "$file")
-    (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" show ":$file" >> "$file")
+    (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" --work-tree="${git_dir}" show ":$file" >> "$file")
   done
   IFS=$OLDIFS
 }
