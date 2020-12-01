@@ -20,5 +20,15 @@ else
   docker pull eu.gcr.io/vwt-d-gew1-dat-cloudbuilders/cloudbuilder-sast:latest
 fi
 
+echo "Cloning schemavalidator"
+git clone https://github.com/vwt-digital/schema-validator.git
+if [[ $hook_branch == "master" ]]; then
+  cd schema-validator &&
+  git checkout origin/master &&
+  cd ..
+fi
+cp -r ./schema-validator/functions/schemavalidator ./hooks/schemavalidator
+rm -rf schema-validator
+
 git config --global core.hooksPath "${DIR}"/hooks
 echo "Configured global core.hooksPath: ${DIR}/hooks"
