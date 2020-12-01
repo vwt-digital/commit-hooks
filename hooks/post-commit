@@ -26,14 +26,8 @@ fi
 
 mkdir tmp-post-commit-folder > /dev/null 2>&1
 
-full_paths=()
-json_validator=false
 for file in $(git diff-index --name-only --diff-filter=ACMT --cached HEAD -- ); do
   cp --parents "$file" tmp-post-commit-folder
-  if [[ $file == *.json ]]; then
-    full_paths+=("$(realpath "$file")")
-    json_validator=true
-  fi
 done
 [ -d "$git_dir"/node_modules ] && cp -r "$git_dir"/node_modules tmp-post-commit-folder
 cp -r "$git_dir"/.git tmp-post-commit-folder
@@ -42,21 +36,6 @@ if [[ -d sast-config ]]; then
 fi
 
 docker run --volume "$git_dir"/tmp-post-commit-folder:/sast-files $docker_image --context post-commit || exit_code=1
-
-# Schema validator
-# Only if there is a schema to validate
-if [[ $json_validator == true ]]; then
-  python3 -m venv tmp-env
-  source tmp-env/bin/activate
-  pip install -r requirements.txt -q
-  echo "Schemavalidator..."
-  # Execute recursively on folders
-  for f in "${full_paths[@]}"; do
-    python ./hooks/schemavalidator/schema_validator.py -jf "$f" || exit_code=1
-  done
-  deactivate
-  rm -rf tmp-env
-fi
 
 # Remove temporary folder
 rm -rf tmp-post-commit-folder

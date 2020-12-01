@@ -17,7 +17,13 @@ function move_files() {
 
   OLDIFS=$IFS
   IFS=$'\n'
+  full_paths=()
+  json_validator=false
   for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
+    if [[ $file == *.json ]]; then
+      full_paths+=("$(realpath "$file")")
+      json_validator=true
+    fi
     dir=$(dirname "$file")
     (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" --work-tree="${git_dir}" show ":$file" >> "$file")
   done
@@ -47,6 +53,21 @@ if [[ -d sast-config ]]; then
 fi
 
 docker run --volume "$git_dir"/tmp-pre-commit-folder:/sast-files $docker_image --context pre-commit || exit_code=1
+
+# Schema validator
+# Only if there is a schema to validate
+if [[ $json_validator == true ]]; then
+  python3 -m venv tmp-env
+  source tmp-env/bin/activate
+  pip install -r requirements.txt -q
+  echo "Schemavalidator..."
+  # Execute recursively on folders
+  for f in "${full_paths[@]}"; do
+    python ./hooks/schemavalidator/schema_validator.py -jf "$f" || exit_code=1
+  done
+  deactivate
+  rm -rf tmp-env
+fi
 
 rm -rf tmp-pre-commit-folder
 
