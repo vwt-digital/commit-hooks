@@ -14,7 +14,7 @@ hook_branch=$(cd "$(dirname "$0")"/.. && git rev-parse --abbrev-ref HEAD)
 
 echo "Running post-commit hook on branch ${branch_name}: "
 ##############################################################################
-##########              SAST scan and schema validator              ##########
+##########                         SAST scan                        ##########
 ##############################################################################
 echo "SAST scan..."
 

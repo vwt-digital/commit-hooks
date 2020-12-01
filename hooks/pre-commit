@@ -37,6 +37,10 @@ recover_image
 
 exit_code=0
 
+##############################################################################
+##########                         SAST scan                        ##########
+##############################################################################
+
 echo ">>> SAST scan..."
 
 if ! docker run hello-world >/dev/null 2>&1; then
@@ -61,7 +65,9 @@ if [ "$exit_code" != 0 ]; then
   echo "ERROR: SAST scan failed. Your changes were reset."
 fi
 
-# Schema validator
+##############################################################################
+##########                      Schema Validator                    ##########
+##############################################################################
 # Only if there is a schema to validate
 if [[ $json_validator == true ]]; then
   python3 -m venv tmp-env
