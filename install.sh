@@ -22,6 +22,11 @@ fi
 
 echo "Cloning schemavalidator"
 git clone https://github.com/vwt-digital/schema-validator.git
+if [[ $hook_branch == "master" ]]; then
+  cd schema-validator &&
+  git checkout origin/master &&
+  cd ..
+fi
 cp -r ./schema-validator/functions/schemavalidator ./hooks/schemavalidator
 rm -rf schema-validator
 
