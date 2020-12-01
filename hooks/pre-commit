@@ -73,7 +73,7 @@ if [[ $json_validator == true ]]; then
   python3 -m venv tmp-env
   source tmp-env/bin/activate
   commit_hooks_dir="$(dirname "$0")"
-  pip install -r "$commit_hooks_dir"/requirements.txt -q
+  pip install -r "$commit_hooks_dir"/schemavalidator/requirements.txt -q
   echo ">>> Schemavalidator..."
   # Execute recursively on folders
   for f in "${full_paths[@]}"; do
