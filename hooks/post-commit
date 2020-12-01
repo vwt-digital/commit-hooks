@@ -37,6 +37,7 @@ fi
 
 docker run --volume "$git_dir"/tmp-post-commit-folder:/sast-files $docker_image --context post-commit || exit_code=1
 
+# Remove temporary folder
 rm -rf tmp-post-commit-folder
 
 if [ "$exit_code" != 0 ] ; then

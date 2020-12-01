@@ -17,7 +17,13 @@ function move_files() {
 
   OLDIFS=$IFS
   IFS=$'\n'
+  full_paths=()
+  json_validator=false
   for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
+    if [[ $file == *.json ]]; then
+      full_paths+=("$(realpath "$file")")
+      json_validator=true
+    fi
     dir=$(dirname "$file")
     (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" --work-tree="${git_dir}" show ":$file" >> "$file")
   done
@@ -30,6 +36,10 @@ move_files
 recover_image
 
 exit_code=0
+
+##############################################################################
+##########                         SAST scan                        ##########
+##############################################################################
 
 echo ">>> SAST scan..."
 
@@ -53,6 +63,29 @@ rm -rf tmp-pre-commit-folder
 if [ "$exit_code" != 0 ]; then
   echo
   echo "ERROR: SAST scan failed. Your changes were reset."
+fi
+
+##############################################################################
+##########                      Schema Validator                    ##########
+##############################################################################
+# Only if there is a schema to validate
+if [[ $json_validator == true ]]; then
+  python3 -m venv tmp-env
+  source tmp-env/bin/activate
+  commit_hooks_dir="$(dirname "$0")"
+  pip install -r "$commit_hooks_dir"/requirements.txt -q
+  echo ">>> Schemavalidator..."
+  # Execute recursively on folders
+  for f in "${full_paths[@]}"; do
+    python "$commit_hooks_dir"/schemavalidator/schema_validator.py -jf "$f" || exit_code=1
+  done
+  deactivate
+  rm -rf tmp-env
+fi
+
+if [ "$exit_code" != 0 ]; then
+  echo
+  echo "ERROR: Schema validator failed. Your changes were reset."
 fi
 
 exit $exit_code
