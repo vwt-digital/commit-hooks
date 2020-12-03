@@ -27,8 +27,15 @@ if [[ $hook_branch == "master" ]]; then
   git checkout origin/master &&
   cd ..
 fi
-cp -r ./schema-validator/commit-hooks/schema-conform-meta-schema ./hooks/schema-conform-meta-schema
+target_dir=./hooks/schema-conform-meta-schema
+if [ -d $target_dir ]; then
+  rm -rf $target_dir
+fi
+cp -rf ./schema-validator/commit-hooks/schema-conform-meta-schema $target_dir
 rm -rf schema-validator
+
+echo "Installing python virtualenv"
+python3 -m pip install --user virtualenv
 
 git config --global core.hooksPath "${DIR}"/hooks
 echo "Configured global core.hooksPath: ${DIR}/hooks"
