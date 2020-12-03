@@ -27,7 +27,7 @@ if [[ $hook_branch == "master" ]]; then
   git checkout origin/master &&
   cd ..
 fi
-cp -r ./schema-validator/functions/schemavalidator ./hooks/schemavalidator
+cp -r ./schema-validator/commit-hooks/schema-conform-meta-schema ./hooks/schema-conform-meta-schema
 rm -rf schema-validator
 
 git config --global core.hooksPath "${DIR}"/hooks
