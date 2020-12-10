@@ -31,7 +31,8 @@ target_dir=./hooks/schema-conform-meta-schema
 if [ -d $target_dir ]; then
   rm -rf $target_dir
 fi
-cp -rf ./schema-validator/commit-hooks/schema-conform-meta-schema $target_dir
+cp -rf ./schema-validator/commit-hooks/schema-conform-meta-schema $target_dir &&
+cp -rf ./schema-validator/general-functions/fill-references-in-schemas/fill_refs_schema_locally.py $target_dir/fill_refs_schema.py &&
 rm -rf schema-validator
 
 echo "Installing python virtualenv"
