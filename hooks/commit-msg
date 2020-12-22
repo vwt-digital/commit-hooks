@@ -27,7 +27,7 @@ fi
 
 if [ -n "${expected_ref}" ]
 then
-    grep "${expected_ref}-[0-9]" "$1"
+	  grep "\(${expected_ref}\)-[0-9]\{3,\}" "$1"
 
     if [ $? -ne 0 ]
     then
