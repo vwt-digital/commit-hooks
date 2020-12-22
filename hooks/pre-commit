@@ -2,6 +2,12 @@
 
 function recover_image() {
   hook_branch=$(cd "$(dirname "$0")"/.. && git rev-parse --abbrev-ref HEAD)
+  update_needed=$(cd "$(dirname "$0")"/.. && git status -uno)
+
+  if [[ $update_needed == *"Your branch is behind"* ]]; then
+    echo -e "\e[31mCommit hooks have been updated! Pull the changes soon.\e[0m"
+    sleep 2
+  fi
 
   if [[ $hook_branch == "develop" ]]; then
     echo -e "\e[33mWARNING: you are running a development version of the git hooks! Use the master branch for more" \
