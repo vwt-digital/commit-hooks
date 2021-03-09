@@ -36,8 +36,18 @@ function move_files() {
   IFS=$OLDIFS
 }
 
+function auto_formatting() {
+  for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
+    black ${file}
+    isort ${file}
+    git add ${file}
+  done
+}
+
+
 git_dir=$(git rev-parse --show-toplevel)
 
+auto_formatting
 move_files
 recover_image
 

@@ -38,5 +38,8 @@ rm -rf schema-validator
 echo "Installing python virtualenv"
 python3 -m pip install --user virtualenv
 
+pip install black
+pip install isort
+
 git config --global core.hooksPath "${DIR}"/hooks
 echo "Configured global core.hooksPath: ${DIR}/hooks"
