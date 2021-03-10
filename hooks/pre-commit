@@ -37,7 +37,7 @@ function move_files() {
 }
 
 function auto_formatting() {
-  for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
+  for file in $(git diff --cached HEAD --name-only --diff-filter=ACM "*.py"); do
     black ${file}
     isort ${file}
     git add ${file}
