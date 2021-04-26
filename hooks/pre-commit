@@ -129,10 +129,6 @@ if [[ $json_files_check == true ]]; then
   if [ -n "$json_git_modified_paths" ]; then
     rm old_json.json
   fi
-  if [ "$exit_code" != 0 ]; then
-    echo
-    echo "ERROR: Data catalog validator failed. Your changes were reset."
-  fi
   # Check added or copied git files
   for f in "${json_git_add_copied_paths[@]}"; do
     python "$commit_hooks_dir"/data_catalog_validator.py --json-file-new "$(realpath "$f")" || exit_code=1
