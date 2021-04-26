@@ -1,1 +1,4 @@
 schema-conform-meta-schema
+env
+json_diff.json
+schema-validator

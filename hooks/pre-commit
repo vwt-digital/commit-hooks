@@ -23,12 +23,24 @@ function move_files() {
 
   OLDIFS=$IFS
   IFS=$'\n'
-  full_paths=()
-  json_validator=false
-  for file in $(git diff --cached HEAD --name-only --diff-filter=ACM); do
+  json_full_paths=()
+  json_git_add_copied_paths=()
+  json_git_modified_paths=()
+  json_files_check=false
+  for file in $(git diff --cached HEAD --name-only --diff-filter=AC); do
     if [[ $file == *.json ]]; then
-      full_paths+=("$(realpath "$file")")
-      json_validator=true
+      json_full_paths+=("$(realpath "$file")")
+      json_git_add_copied_paths+=("$file")
+      json_files_check=true
+    fi
+    dir=$(dirname "$file")
+    (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" --work-tree="${git_dir}" show ":$file" >> "$file")
+  done
+  for file in $(git diff --cached HEAD --name-only --diff-filter=M); do
+    if [[ $file == *.json ]]; then
+      json_full_paths+=("$(realpath "$file")")
+      json_git_modified_paths+=("$file")
+      json_files_check=true
     fi
     dir=$(dirname "$file")
     (cd tmp-pre-commit-folder && mkdir -p "$dir" && git --git-dir="${git_dir}/.git" --work-tree="${git_dir}" show ":$file" >> "$file")
@@ -82,26 +94,55 @@ if [ "$exit_code" != 0 ]; then
 fi
 
 ##############################################################################
-##########                      Schema Validator                    ##########
+##########             Schema and Data catalog Validator            ##########
 ##############################################################################
-# Only if there is a schema to validate
-if [[ $json_validator == true ]]; then
+# Only if there are json files to validate
+if [[ $json_files_check == true ]]; then
   python3 -m venv tmp-env
   source tmp-env/bin/activate
+  pip install --upgrade pip
+  #########################
+  # Schema validator
+  #########################
   commit_hooks_dir="$(dirname "$0")"
   pip install -r "$commit_hooks_dir"/schema-conform-meta-schema/requirements.txt -q
   echo ">>> Schemavalidator..."
   # Execute recursively on folders
-  for f in "${full_paths[@]}"; do
-    python "$commit_hooks_dir"/schema-conform-meta-schema/schema_against_meta_schema.py -jf "$f" || exit_code=1
+  for f in "${json_full_paths[@]}"; do
+    python "$commit_hooks_dir"/schema-conform-meta-schema/schema_against_meta_schema.py --json-file "$f" || exit_code=1
   done
+  if [ "$exit_code" != 0 ]; then
+    echo
+    echo "ERROR: Schema validator failed. Your changes were reset."
+  fi
+  #########################
+  # Data catalog validator
+  #########################
+  echo ">>> Data catalog validator..."
+  pip install jsondiff==1.3.0
+  # Check modified files with their old git files
+  for f in "${json_git_modified_paths[@]}"; do
+    # Get last version of file
+    git show HEAD~:"$f" > old_json.json
+    python "$commit_hooks_dir"/data_catalog_validator.py --json-file-old "old_json.json" --json-file-new "$(realpath "$f")" || exit_code=1
+  done
+  if [ -n "$json_git_modified_paths" ]; then
+    rm old_json.json
+  fi
+  if [ "$exit_code" != 0 ]; then
+    echo
+    echo "ERROR: Data catalog validator failed. Your changes were reset."
+  fi
+  # Check added or copied git files
+  for f in "${json_git_add_copied_paths[@]}"; do
+    python "$commit_hooks_dir"/data_catalog_validator.py --json-file-new "$(realpath "$f")" || exit_code=1
+  done
+  if [ "$exit_code" != 0 ]; then
+    echo
+    echo "ERROR: Data catalog validator failed. Your changes were reset."
+  fi
   deactivate
   rm -rf tmp-env
-fi
-
-if [ "$exit_code" != 0 ]; then
-  echo
-  echo "ERROR: Schema validator failed. Your changes were reset."
 fi
 
 exit $exit_code
