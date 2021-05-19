@@ -56,9 +56,32 @@ function auto_formatting() {
   done
 }
 
+function validate_cloudbuild_image_usage() {
+  manual_function_deployment=0
+  manual_scheduler_deployment=0
+
+  for file in $(git diff --cached HEAD --name-only --diff-filter=ACM "*.yaml" "*.json"); do
+    if [[ $(grep -i "gcloud functions deploy" ${file}) ]]; then
+      manual_function_deployment=1
+    fi
+    if [[ $(grep -i "gcloud scheduler jobs create" ${file}) ]]; then
+      manual_scheduler_deployment=1
+    fi
+  done
+
+  if [ "$manual_function_deployment" != 0 ]; then
+    echo -e "\e[33mWARNING: you are manually deploying a Cloud Function. From the 21st of June, the usage of the" \
+      "Cloud Builder Image is required. See https://github.com/vwt-digital/cloudbuilder-function-deploy for more information.\e[0m"
+  fi
+  if [ "$manual_scheduler_deployment" != 0 ]; then
+    echo -e "\e[33mWARNING: you are manually deploying a Cloud Scheduler. From the 21st of June, the usage of the" \
+      "Cloud Builder Image is required. See https://github.com/vwt-digital/cloudbuilder-scheduler-deploy for more information.\e[0m"
+  fi
+}
 
 git_dir=$(git rev-parse --show-toplevel)
 
+validate_cloudbuild_image_usage
 auto_formatting
 move_files
 recover_image
