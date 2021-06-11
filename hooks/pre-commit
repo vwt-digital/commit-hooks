@@ -48,6 +48,16 @@ function move_files() {
   IFS=$OLDIFS
 }
 
+function validate_new_requirements() {
+    files=$(find . -name "requirements.unexpanded.txt" | wc -l)
+    if [[ $files -gt 0 ]]; then
+              echo -e "\e[33mWARNING: The project you made changes to seems to be using requirements.unexpanded.txt as a" \
+         "method to ensure all dependencies are locked. Switch to using requirements.in conform the new guidelines" \
+         "specified by DAT-6076 in https://github.com/vwt-digital/operational-data-hub/blob/develop/architecture/adr/0060-lock-pip-requirements.md" \
+         "before the 1st of July, 2021\e[0m"
+    fi
+}
+
 function auto_formatting() {
   for file in $(git diff --cached HEAD --name-only --diff-filter=ACM "*.py"); do
     black ${file}
@@ -81,10 +91,11 @@ function validate_cloudbuild_image_usage() {
 
 git_dir=$(git rev-parse --show-toplevel)
 
+recover_image
+validate_new_requirements
 validate_cloudbuild_image_usage
 auto_formatting
 move_files
-recover_image
 
 exit_code=0
 
