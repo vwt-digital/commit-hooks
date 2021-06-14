@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+from datetime import datetime
 
 import jsondiff
 
@@ -72,6 +73,83 @@ def check_change(change, dataset_nrs):
     return dataset_nrs
 
 
+def qualified_relation_check(distribution, file_name):
+    # Check if distribution contains the field "qualifiedRelation"
+    qualifiedRelationDist = distribution.get("qualifiedRelation")
+    if not qualifiedRelationDist:
+        print(
+            "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'qualifiedRelation'".format(
+                dataset["identifier"], file_name, distribution["title"]
+            )
+        )
+        print(
+            "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+        )
+        sys.exit(1)
+    for qrd in qualifiedRelationDist:
+        hadRoleDist = qrd.get("hadRole")
+        if not hadRoleDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'hadRole'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+            )
+            sys.exit(1)
+        relationDist = qrd.get("relation")
+        if not relationDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'relation'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+            )
+            sys.exit(1)
+
+
+def lifespan_check(distribution, file_name):
+    topic_ended = False
+    # Check if topic distribution contains the field "lifespan"
+    if distribution.get("format") == "topic":
+        lifespanDist = distribution.get("lifespan")
+        if not lifespanDist:
+            print(
+                "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'lifespan'".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#distribution-lifespan"
+            )
+            sys.exit(1)
+        startDateDist = lifespanDist.get("startDate")
+        if not startDateDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'lifespan' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'startDate'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#distribution-lifespan"
+            )
+            sys.exit(1)
+        endDateDist = lifespanDist.get("endDate")
+        if endDateDist:
+            past = datetime.strptime(endDateDist, "%Y-%m-%d")
+            present = datetime.now()
+            check_date = past.date() <= present.date()
+            if check_date is False:
+                topic_ended = True
+    return topic_ended
+
+
 def check_dataset(dataset, file_name):
     # Check if dataset contains field "qualifiedRelation"
     check_qualifiedrelation_dataset(dataset, file_name)
@@ -86,43 +164,8 @@ def check_dataset(dataset, file_name):
     format_list = []
     for distribution in distributions:
         format_list.append(distribution.get("format"))
-        # Check if distribution contains the field "qualifiedRelation"
-        qualifiedRelationDist = distribution.get("qualifiedRelation")
-        if not qualifiedRelationDist:
-            print(
-                "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'qualifiedRelation'".format(
-                    dataset["identifier"], file_name, distribution["title"]
-                )
-            )
-            print(
-                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-            )
-            sys.exit(1)
-        for qrd in qualifiedRelationDist:
-            hadRoleDist = qrd.get("hadRole")
-            if not hadRoleDist:
-                print(
-                    "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
-                        dataset["identifier"], file_name, distribution["title"]
-                    )
-                    + " that does not contain the field 'hadRole'"
-                )
-                print(
-                    "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-                )
-                sys.exit(1)
-            relationDist = qrd.get("relation")
-            if not relationDist:
-                print(
-                    "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
-                        dataset["identifier"], file_name, distribution["title"]
-                    )
-                    + " that does not contain the field 'relation'"
-                )
-                print(
-                    "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-                )
-                sys.exit(1)
+        qualified_relation_check(distribution, file_name)
+        topic_ended = lifespan_check(distribution, file_name)
     # Check if distribution list contains subscriptions but no topics
     if "subscription" in format_list:
         if "topic" not in format_list:
@@ -130,6 +173,12 @@ def check_dataset(dataset, file_name):
                 "ERROR: Dataset {} of file {} contains a subscription in the distribution list but no topic".format(
                     dataset["identifier"], file_name
                 )
+            )
+            sys.exit(1)
+        if topic_ended:
+            print(
+                "ERROR: Dataset {} of file {} contains a subscription in the distribution list but topic has an end date of today"
+                " or before today".format(dataset["identifier"], file_name)
             )
             sys.exit(1)
 
