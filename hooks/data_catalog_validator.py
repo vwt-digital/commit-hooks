@@ -77,7 +77,7 @@ def check_change(change, dataset_nrs):
     return dataset_nrs
 
 
-def qualified_relation_check(distribution, file_name):
+def qualified_relation_check(dataset, distribution, file_name):
     # Check if distribution contains the field "qualifiedRelation"
     qualifiedRelationDist = distribution.get("qualifiedRelation")
     if not qualifiedRelationDist:
@@ -164,7 +164,7 @@ def check_dataset(dataset, file_name):
     topic_ended = False
     for distribution in distributions:
         format_list.append(distribution.get("format"))
-        qualified_relation_check(distribution, file_name)
+        qualified_relation_check(dataset, distribution, file_name)
         topic_ended_check = lifespan_check(dataset, distribution, file_name)
         if topic_ended_check:
             topic_ended = True
