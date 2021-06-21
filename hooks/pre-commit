@@ -80,12 +80,16 @@ function validate_cloudbuild_image_usage() {
   done
 
   if [ "$manual_function_deployment" != 0 ]; then
-    echo -e "\e[33mWARNING: you are manually deploying a Cloud Function. From the 21st of June, the usage of the" \
-      "Cloud Builder Image is required. See https://github.com/vwt-digital/cloudbuilder-function-deploy for more information.\e[0m"
+    echo -e "\e[31mERROR: you are manually deploying a Cloud Function. The usage of the Cloud Builder Image is required." \
+      "See https://github.com/vwt-digital/cloudbuilder-function-deploy for more information.\e[0m"
   fi
   if [ "$manual_scheduler_deployment" != 0 ]; then
-    echo -e "\e[33mWARNING: you are manually deploying a Cloud Scheduler. From the 21st of June, the usage of the" \
-      "Cloud Builder Image is required. See https://github.com/vwt-digital/cloudbuilder-scheduler-deploy for more information.\e[0m"
+    echo -e "\e[31mERROR: you are manually deploying a Cloud Scheduler. The usage of the Cloud Builder Image is required." \
+      "See https://github.com/vwt-digital/cloudbuilder-scheduler-deploy for more information.\e[0m"
+  fi
+
+  if [ "$manual_function_deployment" != 0 ] || [ "$manual_scheduler_deployment" != 0 ]; then
+    exit 1
   fi
 }
 
