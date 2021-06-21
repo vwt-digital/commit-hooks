@@ -1,6 +1,7 @@
 import argparse
 import json
 import sys
+from datetime import datetime
 
 import jsondiff
 
@@ -8,6 +9,9 @@ import jsondiff
 def compare_with_old_file(json_file_old, json_file_new, file_name_new):
     # Compare differences between old json and new json
     diff_json = jsondiff.diff(json_file_old, json_file_new)
+    # If there are no differences
+    if not diff_json:
+        return True
     # Get keys of object that is different now
     diff_json_keys = list(diff_json.keys())
     # Check if first key is dataset
@@ -45,6 +49,7 @@ def compare_with_old_file(json_file_old, json_file_new, file_name_new):
     for dataset_nr in dataset_nrs:
         dataset = json_file_new["dataset"][dataset_nr]
         check_dataset(dataset, file_name_new)
+    return True
 
 
 def check_change(change, dataset_nrs):
@@ -72,57 +77,97 @@ def check_change(change, dataset_nrs):
     return dataset_nrs
 
 
+def qualified_relation_check(dataset, distribution, file_name):
+    # Check if distribution contains the field "qualifiedRelation"
+    qualifiedRelationDist = distribution.get("qualifiedRelation")
+    if not qualifiedRelationDist:
+        print(
+            "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'qualifiedRelation'".format(
+                dataset["identifier"], file_name, distribution["title"]
+            )
+        )
+        print(
+            "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+        )
+        sys.exit(1)
+    for qrd in qualifiedRelationDist:
+        hadRoleDist = qrd.get("hadRole")
+        if not hadRoleDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'hadRole'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+            )
+            sys.exit(1)
+        relationDist = qrd.get("relation")
+        if not relationDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'relation'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
+            )
+            sys.exit(1)
+
+
+def lifespan_check(dataset, distribution, file_name):
+    check_date = False
+    # Check if topic distribution contains the field "lifespan"
+    if distribution.get("format") == "topic":
+        lifespanDist = distribution.get("lifespan")
+        if not lifespanDist:
+            print(
+                "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'lifespan'".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#distribution-lifespan"
+            )
+            sys.exit(1)
+        startDateDist = lifespanDist.get("startDate")
+        if not startDateDist:
+            print(
+                "ERROR: Dataset {} of file {} contains a 'lifespan' in distribution {}".format(
+                    dataset["identifier"], file_name, distribution["title"]
+                )
+                + " that does not contain the field 'startDate'"
+            )
+            print(
+                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#distribution-lifespan"
+            )
+            sys.exit(1)
+        endDateDist = lifespanDist.get("endDate")
+        if endDateDist:
+            past = datetime.strptime(endDateDist, "%Y-%m-%d")
+            present = datetime.now()
+            check_date = past.date() <= present.date()
+    return check_date
+
+
 def check_dataset(dataset, file_name):
     # Check if dataset contains field "qualifiedRelation"
     check_qualifiedrelation_dataset(dataset, file_name)
     # Check if dataset contains a distribution
     distributions = dataset.get("distribution")
     if not distributions:
-        print(
-            "INFO: Dataset in data catalog that contains changes does not have a distribution"
-        )
         sys.exit(0)
-    # Check distributions
+    # Check distributions on qualifiedrelation or lifespan
     format_list = []
+    topic_ended = False
     for distribution in distributions:
         format_list.append(distribution.get("format"))
-        # Check if distribution contains the field "qualifiedRelation"
-        qualifiedRelationDist = distribution.get("qualifiedRelation")
-        if not qualifiedRelationDist:
-            print(
-                "ERROR: Dataset {} of file {} contains distribution {} that doet not contain the field 'qualifiedRelation'".format(
-                    dataset["identifier"], file_name, distribution["title"]
-                )
-            )
-            print(
-                "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-            )
-            sys.exit(1)
-        for qrd in qualifiedRelationDist:
-            hadRoleDist = qrd.get("hadRole")
-            if not hadRoleDist:
-                print(
-                    "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
-                        dataset["identifier"], file_name, distribution["title"]
-                    )
-                    + " that does not contain the field 'hadRole'"
-                )
-                print(
-                    "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-                )
-                sys.exit(1)
-            relationDist = qrd.get("relation")
-            if not relationDist:
-                print(
-                    "ERROR: Dataset {} of file {} contains a 'qualifiedRelation' in distribution {}".format(
-                        dataset["identifier"], file_name, distribution["title"]
-                    )
-                    + " that does not contain the field 'relation'"
-                )
-                print(
-                    "For more information see https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema/#qualifiedRelation"
-                )
-                sys.exit(1)
+        qualified_relation_check(dataset, distribution, file_name)
+        topic_ended_check = lifespan_check(dataset, distribution, file_name)
+        if topic_ended_check:
+            topic_ended = True
     # Check if distribution list contains subscriptions but no topics
     if "subscription" in format_list:
         if "topic" not in format_list:
@@ -130,6 +175,12 @@ def check_dataset(dataset, file_name):
                 "ERROR: Dataset {} of file {} contains a subscription in the distribution list but no topic".format(
                     dataset["identifier"], file_name
                 )
+            )
+            sys.exit(1)
+        if topic_ended:
+            print(
+                "ERROR: Dataset {} of file {} contains a subscription in the distribution list but topic has an end date of today"
+                " or before today".format(dataset["identifier"], file_name)
             )
             sys.exit(1)
 
@@ -171,6 +222,27 @@ def check_qualifiedrelation_dataset(dataset, file_name):
             sys.exit(1)
 
 
+def check_conforms_to(json_file_new, file_name_new):
+    conforms_to = json_file_new.get("conformsTo")
+    if conforms_to:
+        if (
+            conforms_to
+            == "https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema"
+        ):
+            if not json_file_new.get("dataset"):
+                print(
+                    "ERROR: JSON file {} does not contain field 'dataset' but does have a schema"
+                    " defined by https://vwt-digital.github.io/project-company-data.github.io/v1.1/schema".format(
+                        file_name_new
+                    )
+                )
+                sys.exit(1)
+        else:
+            sys.exit(0)
+    else:
+        sys.exit(0)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-jfo", "--json-file-old", required=False)
@@ -207,15 +279,13 @@ if __name__ == "__main__":
             )
         )
         sys.exit(1)
-    # Check if new file has "dataset" as field
-    if not json_file_new.get("dataset"):
-        print(
-            "INFO: JSON file {} does not contain field 'dataset'".format(file_name_new)
-        )
-        sys.exit(0)
+    # Check if new file needs and has "dataset" as field
+    check_conforms_to(json_file_new, file_name_new)
     # Check if have to compare to old file or if it is a new file
     if compare:
-        compare_with_old_file(json_file_old, json_file_new, file_name_new)
+        compare_bool = compare_with_old_file(
+            json_file_old, json_file_new, file_name_new
+        )
     else:
         for dataset in json_file_new["dataset"]:
             check_dataset(dataset, file_name_new)
