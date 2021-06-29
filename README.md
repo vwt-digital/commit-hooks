@@ -20,5 +20,17 @@ script and the hooks to use the location of your image.
 After running the install script, the git hooks path is set to the hooks directory in this repository. Any changes to
 the files in that directory will be automatically applied. There is no need to run the install script again, unless 
 pulling a newer version of the cloudbuilder-sast container.
+
+## Use Remotes
+When using `--no-verify`, git will still call `commit-msg` and `post-commit`. 
+That is why you can use the `remotes` configuration file to specify what remotes should run all commit hooks.
+Other remotes will not use `commit-msg` and `post-commit`.
+You can add or remove any remote from the list.
+
+
+## Validation
+When a commit message has been created, a check mark will be added to the end of the message. This will notify
+other contributors that the commit hooks have been used.
+
 ## Configuration
 **See the [cloudbuilder-sast](https://github.com/vwt-digital/cloudbuilder-sast) readme for configuration options.**
