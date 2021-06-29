@@ -7,7 +7,7 @@ Both Linux and OSX are supported.
 ## Installation
 1. Clone this repository
 2. Make sure Docker is properly installed on your system. Test this by running `docker run hello-world`.
-3. Configure Docker for gcloud using `gcloud auth configure docker`
+3. Configure Docker for gcloud using `gcloud auth configure-docker`
 4. Login to gcloud using `gcloud auth login`
 5. Run the install.sh script
 
