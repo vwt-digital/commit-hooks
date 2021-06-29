@@ -1,25 +1,19 @@
 #!/bin/sh
-#
-# An example hook script to check the commit log message.
-# Called by "git commit" with one argument, the name of the file
-# that has the commit message.  The hook should exit with non-zero
-# status after issuing an appropriate message if it wants to stop the
-# commit.  The hook is allowed to edit the commit message file.
-#
-# To enable this hook, rename this file to "commit-msg".
 
-# Uncomment the below to add a Signed-off-by line to the message.
-# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
-# hook is more suited to it.
-#
-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+REMOTES=""
+while read -r line; do
+    if [ -z "$REMOTES" ]
+    then
+          REMOTES="${line}"
+    else
+          REMOTES="${REMOTES}\|${line}"
+    fi
+done < "${0%/hooks/*}/remotes"
 
-# This example catches duplicate Signed-off-by lines.
 
 remote_spec=$(git remote -v | grep "$(git remote)\s.*(push)$")
 
-if [ -n "$(echo ${remote_spec} | grep "vwt-digital")" ]
+if [ -n "$(echo "${remote_spec}" | grep "$REMOTES")" ]
 then
     expected_ref="DAT\|DAN"
     echo "Committing to vwt-digital repository, expect ${expected_ref} issue reference..."
@@ -33,7 +27,9 @@ then
     then
         echo
         echo >&2 "ERROR: Missing required reference to issue, please add ${expected_ref}-nnn to your comment."
-        echo >&2 "Your changes were not commited."
+        echo >&2 "Your changes were not committed."
         exit 1
+    else
+      printf %s "✓" >> "$1"
     fi
 fi
