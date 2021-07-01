@@ -137,7 +137,13 @@ fi
 # Only if there are json files to validate
 if [[ $json_files_check == true ]]; then
   python3 -m venv tmp-env
-  source tmp-env/bin/activate
+
+  if [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+          source tmp-env/Scripts/activate
+  else
+          source tmp-env/bin/activate
+  fi
+
   pip install --upgrade pip
   #########################
   # Schema validator
