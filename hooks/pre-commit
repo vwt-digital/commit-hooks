@@ -5,8 +5,11 @@ function recover_image() {
   update_needed=$(cd "$(dirname "$0")"/.. && git remote update && git status -uno)
 
   if [[ $update_needed == *"Your branch is behind"* ]]; then
-    echo -e "\e[31mCommit hooks have been updated! Pull the changes soon.\e[0m"
-    sleep 2
+    echo -e "\e[31mCommit hooks have been updated!\e[0m"
+    if [[ $hook_branch == "master" ]]; then
+      echo -e "\e[31mPlease pull the changes.\e[0m"
+      exit 1
+    fi
   fi
 
   if [[ $hook_branch == "develop" ]]; then
@@ -51,10 +54,11 @@ function move_files() {
 function validate_new_requirements() {
     files=$(find . -name "requirements.unexpanded.txt" | wc -l)
     if [[ $files -gt 0 ]]; then
-              echo -e "\e[33mWARNING: The project you made changes to seems to be using requirements.unexpanded.txt as a" \
-         "method to ensure all dependencies are locked. Switch to using requirements.in conform the new guidelines" \
+              echo -e "\e[1;31mThe project you made changes to seems to be using requirements.unexpanded.txt as a" \
+         "method to ensure all dependencies are locked. Switch to using requirements.in conform the guidelines" \
          "specified by DAT-6076 in https://github.com/vwt-digital/operational-data-hub/blob/develop/architecture/adr/0060-lock-pip-requirements.md" \
-         "before the 1st of July, 2021\e[0m"
+         "\e[0m"
+         exit 1
     fi
 }
 

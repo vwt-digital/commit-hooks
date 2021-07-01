@@ -11,6 +11,12 @@ Both Linux and OSX are supported.
 4. Login to gcloud using `gcloud auth login`
 5. Run the install.sh script
 
+Windows users, please note:
+If your python path isn't set, or if it doesn't redirect to python3, change the following to your specification:
+- [install.sh](https://github.com/vwt-digital/commit-hooks/blob/develop/install.sh#L39-L42)
+- [pre-commit](https://github.com/vwt-digital/commit-hooks/blob/develop/hooks/pre-commit#L142)
+
+
 This repository uses a [cloudbuilder-sast](https://github.com/vwt-digital/cloudbuilder-sast) image.  
 If you do not have access to the vwt gcr registry, you will need to build this image yourself and change the install 
 script and the hooks to use the location of your image.
