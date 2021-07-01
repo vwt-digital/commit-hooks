@@ -173,7 +173,9 @@ if [[ $json_files_check == true ]]; then
     # Get last version of file
     git show HEAD~:"$f" > old_json.json
     if test -f "old_json.json"; then
-      python "$commit_hooks_dir"/data_catalog_validator.py --json-file-old "old_json.json" --json-file-new "$(realpath "$f")" || exit_code=1
+      if [ -s "old_json.json" ] ; then
+        python "$commit_hooks_dir"/data_catalog_validator.py --json-file-old "old_json.json" --json-file-new "$(realpath "$f")" || exit_code=1
+      fi
     fi
   done
   if [ -n "$json_git_modified_paths" ]; then
