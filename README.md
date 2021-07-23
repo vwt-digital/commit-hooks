@@ -11,7 +11,10 @@ Both Linux and OSX are supported.
 4. Login to gcloud using `gcloud auth login`
 5. Run the install.sh script
 
-Windows users, please note:
+**Windows users, please note**:
+Use the newest release instead of the source code from the repository. You still need to follow the rest of the steps except step 1,
+with an added step of unzipping the released source.
+
 If your python path isn't set, or if it doesn't redirect to python3, change the following to your specification:
 - [install.sh](https://github.com/vwt-digital/commit-hooks/blob/develop/install.sh#L39-L42)
 - [pre-commit](https://github.com/vwt-digital/commit-hooks/blob/develop/hooks/pre-commit#L142)
