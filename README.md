@@ -1,4 +1,4 @@
-# Pre-commit
+# pre-commit
 
 ###### Note: The *default* branch develop might contain breaking changes if the sast image is not up to date. Make sure to pull from master for a stable version.
 This repository contains commit hook scripts that can be installed globally by running the installation script.
